@@ -113,22 +113,32 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
         }
 
         function convertTo24HourFormat(timeString) {
-            const [time, period] = timeString.split(' ');
-            let [hours, minutes] = time.split(':');
-
-            if (period === 'PM') {
-                hours = (parseInt(hours, 10) % 12) + 12;
-            } else {
-                hours = (hours % 12);
+            if (!timeString || typeof timeString !== 'string') {
+                return '00:00';
             }
 
-            hours = hours.toString().padStart(2, '0');
-            minutes = minutes.toString().padStart(2, '0');
+            // Handle both 12-hour (e.g., "02:30 PM") and 24-hour (e.g., "14:30") formats
+            const parts = timeString.split(' ');
+            let time = parts[0];
+            const period = parts[1];
 
-            return `${hours}:${minutes}`;
+            let [hours, minutes] = time.split(':').map(Number);
+
+            if (isNaN(hours) || isNaN(minutes)) {
+                return '00:00';
+            }
+
+            if (period === 'PM' && hours !== 12) {
+                hours += 12;
+            } else if (period === 'AM' && hours === 12) {
+                hours = 0;
+            }
+            // If no period, assume it's already 24-hour format
+
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         }
-        const start24HourFormat = convertTo24HourFormat(new Date(contest.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
-        const end24HourFormat = convertTo24HourFormat(new Date(contest.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+        const start24HourFormat = convertTo24HourFormat(startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+        const end24HourFormat = convertTo24HourFormat(endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
 
         return (
             <div
@@ -200,8 +210,8 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
                                 name={contest.name}
                                 options={['Apple', 'Google']}
                                 location="World Wide Web"
-                                startDate={new Date(contest.start_time).toISOString().split('T')[0]}
-                                enddate={new Date(contest.end_time).toISOString().split('T')[0]}
+                                startDate={startDate.toISOString().split('T')[0]}
+                                endDate={endDate.toISOString().split('T')[0]}
                                 startTime={start24HourFormat}
                                 endTime={end24HourFormat}
                                 buttonStyle="text"
