@@ -3,7 +3,7 @@
  * Fetches contest data from the backend server
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://coding-contest-tracker.vercel.app';
 
 /**
  * Fetch all contests from all platforms

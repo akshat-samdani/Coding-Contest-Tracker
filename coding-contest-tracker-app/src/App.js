@@ -2,16 +2,16 @@ import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import ContestColumns from './components/ContestsCoulmns';
 import Subscribe from './components/Subscribe';
-import { toast, ToastContainer } from 'react-toastify';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Register from './components/Register';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SignIn from './components/SignIn';
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth, db } from './firebase';
 import { useNavigate } from 'react-router-dom';
-import { ref, set, get, child, onValue } from 'firebase/database';
-import { useAuthState } from 'react-firebase-hooks/auth'; // Import the auth hook from react-firebase-hooks
+import { ref, get, onValue } from 'firebase/database';
+// import { useAuthState } from 'react-firebase-hooks/auth'; // Import the auth hook from react-firebase-hooks
 import StatsComponent from './components/Stats';
 import Account from './components/Account';
 import VerificationPending from './components/VerificationPending';
@@ -53,7 +53,6 @@ const mapping = {
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState('contests');
   const [contests, setContests] = useState([]);
   const [liveContests, setLiveContests] = useState([]);
   const [todayContests, setTodayContests] = useState([]);
@@ -61,13 +60,12 @@ function App() {
   const [subscribedContests, setSubscribedContests] = useState([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState(Object.keys(mapping));
   const [user, setUser] = useState(null);
-
   useEffect(() => {
     // Initialize Firebase Auth state change listener
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         // User is signed in
-        console.log("user", user);
+        // console.log("user", user);
         setUser(user);
         // Load selected platforms from Firebase Realtime Database if the user is authenticated
         const userRef = ref(db, `users/${user.uid}/selectedPlatforms`);
@@ -94,7 +92,7 @@ function App() {
         // User is signed out
         setUser(null);
         // Load selected platforms from local storage if the user is not authenticated
-        const storedPlatforms = JSON.parse(localStorage.getItem('selectedPlatforms')) || [];
+        const storedPlatforms = JSON.parse(localStorage.getItem('selectedPlatforms')) || Object.keys(mapping);
         setSelectedPlatforms(storedPlatforms);
       }
     });
@@ -112,10 +110,7 @@ function App() {
     localStorage.setItem('selectedPlatforms', JSON.stringify(newSelectedPlatforms));
   };
 
-  useEffect(() => {
-    const storedPlatforms = JSON.parse(localStorage.getItem('selectedPlatforms')) || [];
-    setSelectedPlatforms(storedPlatforms);
-  }, []);
+
 
   useEffect(() => {
     fetchContestsFromPlatforms()
@@ -203,7 +198,7 @@ function App() {
         <Navbar user={user} setUser={setUser} />
         <Routes>
           <Route path="/" element={<RedirectToContests />} />
-          <Route path="/contests" element={<ContestColumns liveContests={liveContests} todayContests={todayContests} upcomingContests={upcomingContests} selectedPlatforms={selectedPlatforms} />} />
+          <Route path="/contests" element={<ContestColumns liveContests={liveContests} todayContests={todayContests} upcomingContests={upcomingContests} selectedPlatforms={selectedPlatforms} user={user} />} />
           <Route path="/subscribe" element={<Subscribe selectedPlatforms={selectedPlatforms} onUpdatePlatforms={updateSelectedPlatforms} onSubscribe={handleSubscribe} />} />
           <Route path="/register" element={<Register setUser={setUser} />} />
           <Route path="/signin" element={<SignIn setUser={setUser} />} />
@@ -211,6 +206,7 @@ function App() {
           <Route path="/account" element={<Account user={user} onUsernamesUpdate={handleUsernamesUpdate} />} />
           <Route path="/verification-pending/:email" element={<VerificationPending />} />
         </Routes>
+        <ToastContainer position="top-right" autoClose={5000} />
       </div>
     </Router>
   );

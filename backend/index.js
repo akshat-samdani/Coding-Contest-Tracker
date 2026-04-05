@@ -2,6 +2,7 @@
  * Main server entry point
  * Coding Contest Tracker API Server
  */
+require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const cors = require('cors');
 const config = require('./config/environment');
@@ -17,7 +18,25 @@ const allRoutes = require('./routes/all');
 const app = express();
 
 // ==================== Middleware ====================
-app.use(cors({ origin: config.CORS_ORIGIN }));
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost on any port for development
+    if (origin.startsWith('http://localhost:')) return callback(null, true);
+    
+    // Allow production origins
+    const allowedOrigins = config.CORS_ORIGIN;
+    if (Array.isArray(allowedOrigins)) {
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+    } else if (typeof allowedOrigins === 'string') {
+      if (allowedOrigins === origin) return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'));
+  }
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

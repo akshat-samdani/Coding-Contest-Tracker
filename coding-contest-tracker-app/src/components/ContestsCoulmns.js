@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { auth } from '../firebase';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AddToCalendarButton } from 'add-to-calendar-button-react';
 const mapping = {
     HackerEarth: {
         logo: "https://yt3.ggpht.com/ytc/AAUvwngkLcuAWLtda6tQBsFi3tU9rnSSwsrK1Si7eYtx0A=s176-c-k-c0x00ffffff-no-rj",
@@ -35,7 +37,7 @@ const mapping = {
         color: "#1BA94C",
     },
 };
-function ContestColumns({ liveContests, todayContests, upcomingContests, selectedPlatforms }) {
+function ContestColumns({ liveContests, todayContests, upcomingContests, selectedPlatforms, user }) {
     const [activeView, setActiveView] = useState('live');
     const [notificationTime, setNotificationTime] = useState(10); // Default notification time is 10 minutes
 
@@ -48,6 +50,18 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
 
     const filterContests = (contests) => {
         return contests.filter((contest) => selectedPlatforms.includes(contest.platform));
+
+    };
+    const renderContestCards = (contests) => {
+        if (contests.length === 0) {
+            return <div className="text-center text-gray-600 py-4">No contests available.</div>;
+        }
+
+        return contests.map((contest, index) => (
+            <div key={contest.id || index}>
+                {renderContestCard(contest)}
+            </div>
+        ));
     };
 
     // const renderTimeBox = (time, isStart) => (
@@ -55,7 +69,6 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
     //         {new Date(time).toLocaleTimeString('en-US', { hour12: false })}
     //     </div>
     // );
-
     const renderContestCard = (contest) => {
         const startDate = new Date(contest.startTimeISO);
         // Parse duration from format like "2 hours" or "120 minutes"
@@ -99,6 +112,24 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
             return null;
         }
 
+        function convertTo24HourFormat(timeString) {
+            const [time, period] = timeString.split(' ');
+            let [hours, minutes] = time.split(':');
+
+            if (period === 'PM') {
+                hours = (parseInt(hours, 10) % 12) + 12;
+            } else {
+                hours = (hours % 12);
+            }
+
+            hours = hours.toString().padStart(2, '0');
+            minutes = minutes.toString().padStart(2, '0');
+
+            return `${hours}:${minutes}`;
+        }
+        const start24HourFormat = convertTo24HourFormat(new Date(contest.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+        const end24HourFormat = convertTo24HourFormat(new Date(contest.end_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+
         return (
             <div
                 key={contest.name}
@@ -112,6 +143,8 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
                                 alt={mapping[contest.platform]}
                                 style={{
                                     width: 70,
+                                    minWidth: 70,
+                                    minHeight: 70,
                                     height: 70,
                                     borderRadius: 2,
                                     alignSelf: "center",
@@ -144,11 +177,11 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
                                 {timeRangeString}
                             </span>
                         </div>
-                        <div className="mt-4">
-                            <label htmlFor={`notification-${contest.name}`} className="text-gray-600 font-semibold">Notification:</label>
+                        <div className="mt-4 flex flex-wrap items-center">
+                            <label htmlFor={`notification-${contest.name}`} className="text-gray-600 font-semibold mr-2">Notification:</label>
                             <select
                                 id={`notification-${contest.name}`}
-                                className="ml-2 p-1 rounded border"
+                                className="p-1 rounded border mr-2"
                                 value={notificationTime}
                                 onChange={(e) => setNotificationTime(Number(e.target.value))}
                             >
@@ -158,12 +191,24 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
                                 <option value={60}>1 hour before</option>
                             </select>
                             <button
-                                className="ml-4 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                                className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mr-2"
                                 onClick={() => setNotification(contest, notificationTime)}
                             >
                                 Set Notification
                             </button>
+                            <AddToCalendarButton
+                                name={contest.name}
+                                options={['Apple', 'Google']}
+                                location="World Wide Web"
+                                startDate={new Date(contest.start_time).toISOString().split('T')[0]}
+                                enddate={new Date(contest.end_time).toISOString().split('T')[0]}
+                                startTime={start24HourFormat}
+                                endTime={end24HourFormat}
+                                buttonStyle="text"
+                            ></AddToCalendarButton>
                         </div>
+
+
                     </div>
                 </div>
             </div>
@@ -181,8 +226,36 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
         console.log("Current time: ", currentTime);
         if (notificationTime > currentTime) {
             toast.success('Notification alert created successfully', {
-                autoClose: 2000, // Close after 2 seconds
+                autoClose: 2000,
             });
+
+            const recipientEmail = user.email;
+
+            fetch('http://localhost:3001/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: recipientEmail,
+                    subject: `Contest Reminder: ${contest.name}`,
+                    message: `The contest "${contest.name}" is starting soon at ${new Date(
+                        contest.start_time
+                    ).toLocaleString()}.`,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Email sent successfully');
+                    } else {
+                        console.error('Failed to send email:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending email:', error);
+                });
+
             setTimeout(() => {
                 new Notification(`Contest Reminder: ${contest.name}`, {
                     body: `The contest "${contest.name}" is starting soon.`,
@@ -228,10 +301,11 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
                 </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4 p-2">
-                {activeView === 'today' && filterContests(todayContests).map((contest) => renderContestCard(contest))}
-                {activeView === 'live' && filterContests(liveContests).map((contest) => renderContestCard(contest))}
-                {activeView === 'upcoming' && filterContests(upcomingContests).map((contest) => renderContestCard(contest))}
+                {activeView === 'today' && renderContestCards(filterContests(todayContests))}
+                {activeView === 'live' && renderContestCards(filterContests(liveContests))}
+                {activeView === 'upcoming' && renderContestCards(filterContests(upcomingContests))}
             </div>
+
             <ToastContainer position="top-right" autoClose={5000} />
         </div>
     );

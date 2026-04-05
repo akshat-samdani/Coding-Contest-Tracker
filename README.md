@@ -60,34 +60,63 @@ A full-stack application to track and aggregate coding contests from multiple pl
    cp coding-contest-tracker-app/.env.example coding-contest-tracker-app/.env
    ```
 
+4. **Set up Firebase (Optional)**
+   ```bash
+   # Create your own Firebase project at https://console.firebase.google.com/
+   # Add your Firebase configuration to coding-contest-tracker-app/.env
+   # The app will work without authentication in offline mode if Firebase is not configured.
+   ```
+   **Note:** Firebase configuration is loaded from environment variables. The app gracefully falls back to offline mode without authentication if Firebase credentials are not provided.
+
 ## 🚀 Running the Application
 
-### Development Mode (Recommended)
+### Local Development (Recommended)
+
+For full local development with both backend and frontend:
+
+1. **Ensure environment variables are set up** (from setup steps above)
+
+2. **Start the backend server**
+   ```bash
+   npm run server
+   ```
+   Server runs on `http://localhost:5003`
+   You should see:
+   ```
+   🚀 Contest API Server started
+   📍 Running on http://localhost:5003
+   📚 Environment: development
+   ```
+
+3. **Start the React frontend** (in a new terminal)
+   ```bash
+   cd coding-contest-tracker-app
+   npm start
+   ```
+   Frontend runs on `http://localhost:3000` (or next available port)
+
+4. **Verify setup**
+   - Backend health: `curl http://localhost:5003/health`
+   - API test: `curl http://localhost:5003/api/all`
+   - Frontend: Open browser to the displayed URL
+
+### Using Concurrently (Alternative)
 ```bash
 npm run dev
 ```
-This starts both the backend (port 5001) and frontend (port 3000) concurrently.
+This starts both backend (port 5003) and frontend concurrently using the `concurrently` package.
 
-### Running Separately
+### Production Deployment
 
-**Backend Only:**
-```bash
-npm run server
-```
-Server runs on `http://localhost:5001`
+- **Backend**: Deploy to Vercel, Railway, or similar platform
+- **Frontend**: Build and deploy to Netlify, Vercel, or GitHub Pages
+- **Environment Variables**: Set `REACT_APP_API_BASE_URL` to your deployed backend URL
 
-**Frontend Only:**
-```bash
-cd coding-contest-tracker-app
-npm start
-```
-Frontend runs on `http://localhost:3000`
+### Troubleshooting
 
-### Production Build
-```bash
-npm run build
-```
-Creates optimized build in `coding-contest-tracker-app/build/`
+- **Port conflicts**: If ports 5003 or 3000 are busy, the apps will use next available ports
+- **CORS issues**: The backend allows all `localhost` origins for development
+- **Firebase offline mode**: If Firebase config is missing, the app runs without authentication
 
 ## 📡 API Endpoints
 
@@ -192,7 +221,32 @@ curl "http://localhost:5001/api/all?platforms=codeforces,leetcode"
 curl http://localhost:5001/health
 ```
 
-## 📝 Environment Variables
+## � Firebase Authentication (Optional)
+
+This project uses Firebase for user authentication and data persistence. Since this is an open source project, Firebase configuration is not committed to the repository.
+
+### For Full Features (Recommended)
+
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Authentication and Realtime Database
+3. Copy the example file:
+   ```bash
+   cp coding-contest-tracker-app/src/firebase.js.example coding-contest-tracker-app/src/firebase.js
+   ```
+4. Update `firebase.js` with your Firebase config
+5. Enable the following Firebase services:
+   - Authentication (Email/Password)
+   - Realtime Database
+
+### Offline Mode (No Authentication)
+
+If you don't set up Firebase, the app will run in offline mode with:
+- No user authentication
+- Local storage for platform preferences
+- All contest features available
+- No data persistence across devices
+
+The app automatically detects and handles missing Firebase configuration.
 
 ### Backend
 
@@ -251,6 +305,60 @@ Update `REACT_APP_API_BASE_URL` in frontend .env to point to deployed backend.
 - GitHub Pages
 - Firebase Hosting
 - AWS S3 + CloudFront
+
+## 🌐 Chrome Extension Deployment
+
+This repository includes a Chrome extension version that can be deployed to the Chrome Web Store.
+
+### Build the Extension
+
+1. **Navigate to the extension directory**
+   ```bash
+   cd coding-contest-tracker-app
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Build the React app**
+   ```bash
+   npm run build
+   ```
+
+4. **Package the extension**
+   ```bash
+   # Copy required files to build directory
+   cp public/manifest.json build/
+   cp public/favicon.ico build/
+   cp public/logo192.png build/
+   cp public/logo512.png build/
+
+   # Create the extension zip file
+   cd build
+   zip -r ../coding-contest-tracker-extension.zip .
+   cd ..
+   ```
+
+### Upload to Chrome Web Store
+
+1. Go to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
+2. Click "Add a new item"
+3. Upload the `coding-contest-tracker-extension.zip` file
+4. Fill in the extension details:
+   - Name: Coding Contest Tracker
+   - Description: Track upcoming coding contests from CodeForces, CodeChef, and LeetCode
+   - Icons: Use the provided logo files
+5. Submit for review
+
+### Extension Features
+
+- **Contest Tracking**: View upcoming, live, and today's contests
+- **Add to Calendar**: Add contests to Apple or Google Calendar
+- **Notifications**: Get browser notifications for contests
+- **User Authentication**: Sign in with Firebase to save preferences
+- **Platform Filtering**: Filter contests by CodeForces, CodeChef, LeetCode
 
 ## 📄 License
 

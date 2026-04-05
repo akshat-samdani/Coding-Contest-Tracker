@@ -5,11 +5,11 @@
 ```
 ┌─────────────────────────────────────────┐
 │   React Frontend (Port 3000)            │
-│   - Calls localhost:5000/api/...        │
+│   - Calls localhost:5003/api/...        │
 └──────────────┬──────────────────────────┘
                │
 ┌──────────────▼──────────────────────────┐
-│   Express Backend Server (Port 5000)    │
+│   Express Backend Server (Port 5003)    │
 │   - Wraps official platform APIs        │
 │   - Handles CORS                        │
 │   - Aggregates contest data             │
@@ -31,7 +31,7 @@ npm run dev
 ```
 
 This will start:
-- Backend server on `http://localhost:5000`
+- Backend server on `http://localhost:5003`
 - React app on `http://localhost:3000`
 
 ### Option 2: Run Separately
@@ -42,7 +42,7 @@ npm run server
 ```
 You should see:
 ```
-🚀 Contest API Server running on http://localhost:5000
+🚀 Contest API Server running on http://localhost:5003
 📍 Available endpoints:
    GET /api/codeforces - CodeForces contests
    GET /api/codechef - CodeChef contests
@@ -61,20 +61,20 @@ npm run client
 
 ### Get all contests from all platforms
 ```
-GET http://localhost:5000/api/all
+GET http://localhost:5003/api/all
 ```
 
 ### Get contests from specific platforms
 ```
-GET http://localhost:5000/api/all?platforms=codeforces,codechef
-GET http://localhost:5000/api/all?platforms=leetcode
+GET http://localhost:5003/api/all?platforms=codeforces,codechef
+GET http://localhost:5003/api/all?platforms=leetcode
 ```
 
 ### Get contests from single platform
 ```
-GET http://localhost:5000/api/codeforces
-GET http://localhost:5000/api/codechef
-GET http://localhost:5000/api/leetcode
+GET http://localhost:5003/api/codeforces
+GET http://localhost:5003/api/codechef
+GET http://localhost:5003/api/leetcode
 ```
 
 ### Response Format
@@ -97,10 +97,10 @@ GET http://localhost:5000/api/leetcode
 
 Test the server with:
 ```bash
-curl http://localhost:5000/health
+curl http://localhost:5003/health
 # Should return: {"status":"ok"}
 
-curl http://localhost:5000/api/codeforces
+curl http://localhost:5003/api/codeforces
 # Should return: [array of CodeForces contests]
 ```
 
