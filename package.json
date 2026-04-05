@@ -1,32 +1,18 @@
 {
-  "name": "coding-contest-tracker",
+  "name": "coding-contest-tracker-api",
   "version": "1.0.0",
-  "description": "Track coding contests from multiple platforms",
+  "description": "Coding Contest Tracker API server for backend deployment",
   "main": "backend/index.js",
   "scripts": {
-    "server": "node backend/index.js",
-    "server:dev": "NODE_ENV=development node backend/index.js",
-    "client": "cd coding-contest-tracker-app && npm start",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "install-all": "npm install && cd coding-contest-tracker-app && npm install",
-    "build": "cd coding-contest-tracker-app && npm run build"
+    "start": "node backend/index.js",
+    "dev": "NODE_ENV=development node backend/index.js"
   },
   "engines": {
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.4.2",
-    "@fortawesome/free-solid-svg-icons": "^6.4.2",
-    "@fortawesome/react-fontawesome": "^0.2.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "firebase": "^10.4.0",
-    "node-fetch": "^2.6.11",
-    "react-firebase-hooks": "^5.1.1",
-    "react-fontawesome": "^1.7.1",
-    "reactjs-popup": "^2.0.6"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.1"
+    "node-fetch": "^2.6.11"
   }
 }
