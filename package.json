@@ -2,12 +2,17 @@
   "name": "coding-contest-tracker",
   "version": "1.0.0",
   "description": "Track coding contests from multiple platforms",
-  "main": "server.js",
+  "main": "backend/index.js",
   "scripts": {
-    "server": "node server.js",
+    "server": "node backend/index.js",
+    "server:dev": "NODE_ENV=development node backend/index.js",
     "client": "cd coding-contest-tracker-app && npm start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "install-all": "npm install && cd coding-contest-tracker-app && npm install"
+    "install-all": "npm install && cd coding-contest-tracker-app && npm install",
+    "build": "cd coding-contest-tracker-app && npm run build"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",

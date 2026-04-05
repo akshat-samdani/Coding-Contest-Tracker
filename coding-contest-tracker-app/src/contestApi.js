@@ -1,8 +1,13 @@
-// API calls to local backend server (running on localhost:5001)
-// The backend wraps official platform APIs and handles CORS
+/**
+ * Contest API service
+ * Fetches contest data from the backend server
+ */
 
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001';
 
+/**
+ * Fetch all contests from all platforms
+ */
 export const fetchContestsFromPlatforms = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/all`);
@@ -17,7 +22,9 @@ export const fetchContestsFromPlatforms = async () => {
   }
 };
 
-// Fetch specific platform contests
+/**
+ * Fetch contests from a specific platform
+ */
 export const fetchPlatformContests = async (platform) => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/${platform.toLowerCase()}`);
@@ -32,11 +39,15 @@ export const fetchPlatformContests = async (platform) => {
   }
 };
 
-// Fetch contests from specific platforms
+/**
+ * Fetch contests from multiple specific platforms
+ */
 export const fetchMultiplePlatforms = async (platforms) => {
   try {
-    const platformStr = platforms.map(p => p.toLowerCase()).join(',');
-    const response = await fetch(`${API_BASE_URL}/api/all?platforms=${platformStr}`);
+    const platformStr = platforms.map((p) => p.toLowerCase()).join(',');
+    const response = await fetch(
+      `${API_BASE_URL}/api/all?platforms=${platformStr}`
+    );
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
     }
