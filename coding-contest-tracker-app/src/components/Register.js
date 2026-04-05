@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function Register({ setUser }) {
   const [email, setEmail] = useState('');
@@ -22,16 +23,48 @@ function Register({ setUser }) {
         sendEmailVerification(user)
           .then(() => {
             console.log('Email verification sent to:', user.email);
+            toast.success('Registration successful! Please check your email (including spam folder) for verification link.', {
+              autoClose: 6000,
+            });
             navigate(`/verification-pending/${user.email}`);
           })
           .catch((error) => {
             console.error('Error sending email verification:', error);
+            toast.error('Account created but failed to send verification email. Please try signing in.', {
+              autoClose: 4000,
+            });
+            navigate('/signin');
           });
 
         setUser(user);
       })
       .catch((error) => {
-        console.error('Error registering user:', error)
+        console.error('Error registering user:', error);
+        let errorMessage = 'Registration failed. Please try again.';
+
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = 'An account with this email already exists. Try signing in instead.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'Invalid email address format.';
+            break;
+          case 'auth/weak-password':
+            errorMessage = 'Password is too weak. Please use at least 6 characters.';
+            break;
+          case 'auth/operation-not-allowed':
+            errorMessage = 'Email/password accounts are not enabled. Please contact support.';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Too many registration attempts. Please try again later.';
+            break;
+          default:
+            errorMessage = error.message;
+        }
+
+        toast.error(errorMessage, {
+          autoClose: 5000,
+        });
       })
       .finally(() => {
         setIsLoading(false); // Set loading state to false after registration completes (success or error)
@@ -62,6 +95,18 @@ function Register({ setUser }) {
         <button type="submit" className={`w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={isLoading}>
           {isLoading ? 'Registering...' : 'Register'}
         </button>
+        <div className="mt-4 text-center">
+          <span className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/signin')}
+              className="text-indigo-600 hover:text-indigo-500 font-medium"
+            >
+              Sign in here
+            </button>
+          </span>
+        </div>
       </form>
     </div>
   );

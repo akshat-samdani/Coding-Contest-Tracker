@@ -227,6 +227,14 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
 
 
     const setNotification = (contest, minutesBefore) => {
+        // Check if user is logged in
+        if (!user || !user.email) {
+            toast.error('Please sign in to set notifications', {
+                autoClose: 2000,
+            });
+            return;
+        }
+
         const startTime = new Date(contest.startTimeISO).getTime();
         const notificationTime = startTime - minutesBefore * 60 * 1000; // Calculate the notification time
         console.log("Notification time: ", notificationTime);
@@ -250,7 +258,7 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
                     email: recipientEmail,
                     subject: `Contest Reminder: ${contest.name}`,
                     message: `The contest "${contest.name}" is starting soon at ${new Date(
-                        contest.start_time
+                        contest.startTimeISO
                     ).toLocaleString()}.`,
                 }),
             })
