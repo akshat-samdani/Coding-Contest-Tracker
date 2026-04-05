@@ -72,6 +72,27 @@ This branch is ready for deployment to Vercel.
 - Configure environment variables in the Vercel dashboard.
 - Vercel will assign the runtime port automatically.
 
+### Recommended Vercel environment variables
+
+- `NODE_ENV=production`
+- `LOG_LEVEL=info`
+- `CORS_ORIGIN=https://<your-frontend-domain>`
+
+> If the API is consumed by a frontend hosted elsewhere, set `CORS_ORIGIN` to that frontend URL.
+
+### Vercel deployment tips
+
+- Leave `PORT` unset unless Vercel explicitly requests it.
+- Leave the output directory blank for backend-only projects.
+- If Vercel prompts for a build command, use `npm install` or leave blank.
+
+### Post-deploy verification
+
+```bash
+curl https://<your-vercel-project>.vercel.app/health
+curl https://<your-vercel-project>.vercel.app/api/leetcode
+```
+
 ## Troubleshooting
 
 - If the port is already in use, set `PORT` in `.env` or via environment variables.
