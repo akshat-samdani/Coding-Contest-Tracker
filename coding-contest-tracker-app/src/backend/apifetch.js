@@ -31,29 +31,44 @@ var defaultDailyChallenge = {
 
 // ========================================== Helper ==================================================
 function sortFunction(a, b) {
-    var dateA = new Date(a.start_time).getTime();
-    var dateB = new Date(b.start_time).getTime();
+    // Handle both old format (start_time) and new format (startTimeISO)
+    var dateA = new Date(a.startTimeISO || a.start_time).getTime();
+    var dateB = new Date(b.startTimeISO || b.start_time).getTime();
     return dateA > dateB ? 1 : -1;
 }
 
 async function fetchContestDetails() {
-    const res = await fetch(`https://kontests.net/api/v1/all`, {
-        method: "GET",
-        headers: {
-            "Content-type": "application/json; charset=UTF-8",
-        },
-    });
-    if (!res.ok) {
-        const message = "An error has occured";
-        throw new Error(message);
+    try {
+        const res = await fetch(`/api/all`, {
+            method: "GET",
+            headers: {
+                "Content-type": "application/json; charset=UTF-8",
+            },
+        });
+        if (!res.ok) {
+            throw new Error(`API error: ${res.status}`);
+        }
+
+        const data = await res.json();
+        // Handle both paginated and non-paginated responses
+        var contests = data.contests || data;
+        
+        // Get GFG contests if available
+        let gfgContests = [];
+        try {
+            gfgContests = await getGfgContests();
+        } catch (err) {
+            console.log('GFG contests not available:', err);
+        }
+        
+        var contestDetails = [...(Array.isArray(contests) ? contests : []), ...gfgContests];
+
+        contestDetails.sort(sortFunction);
+        return contestDetails;
+    } catch (error) {
+        console.error('Error fetching contest details:', error);
+        throw error;
     }
-
-    var contests = await res.json();
-    var gfgContests = await getGfgContests();
-    var contestDetails = [...contests, ...gfgContests];
-
-    contestDetails.sort(sortFunction);
-    return contestDetails;
 }
 
 async function fetchLeetCodeDailyQuestion() {

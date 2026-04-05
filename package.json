@@ -1,11 +1,27 @@
 {
+  "name": "coding-contest-tracker",
+  "version": "1.0.0",
+  "description": "Track coding contests from multiple platforms",
+  "main": "server.js",
+  "scripts": {
+    "server": "node server.js",
+    "client": "cd coding-contest-tracker-app && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd coding-contest-tracker-app && npm install"
+  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
     "firebase": "^10.4.0",
+    "node-fetch": "^2.6.11",
     "react-firebase-hooks": "^5.1.1",
     "react-fontawesome": "^1.7.1",
     "reactjs-popup": "^2.0.6"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.1"
   }
 }

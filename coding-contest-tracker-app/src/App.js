@@ -15,6 +15,7 @@ import { useAuthState } from 'react-firebase-hooks/auth'; // Import the auth hoo
 import StatsComponent from './components/Stats';
 import Account from './components/Account';
 import VerificationPending from './components/VerificationPending';
+import { fetchContestsFromPlatforms } from './contestApi';
 
 const mapping = {
   HackerEarth: {
@@ -117,25 +118,26 @@ function App() {
   }, []);
 
   useEffect(() => {
-    fetch('https://kontests.net/api/v1/all')
-      .then((response) => response.json())
+    fetchContestsFromPlatforms()
       .then((data) => {
         const currentDate = new Date();
+        const contests_list = Array.isArray(data) ? data : [];
         const live = [];
         const today = [];
         const upcoming = [];
 
-        data.forEach((contest) => {
-          const startTime = new Date(contest.start_time);
-          if (startTime <= currentDate) {
+        contests_list.forEach((contest) => {
+          const startTime = new Date(contest.startTimeISO);
+          if (contest.status === 'ongoing') {
             live.push(contest);
           } else if (
             startTime.getDate() === currentDate.getDate() &&
             startTime.getMonth() === currentDate.getMonth() &&
-            startTime.getFullYear() === currentDate.getFullYear()
+            startTime.getFullYear() === currentDate.getFullYear() &&
+            contest.status === 'upcoming'
           ) {
             today.push(contest);
-          } else {
+          } else if (contest.status === 'upcoming') {
             upcoming.push(contest);
           }
         });
@@ -143,7 +145,11 @@ function App() {
         setLiveContests(live);
         setTodayContests(today);
         setUpcomingContests(upcoming);
-        setContests(data);
+        setContests(contests_list);
+      })
+      .catch((error) => {
+        console.error('Error fetching contests:', error);
+        toast.error('Failed to load contests. Please try refreshing.');
       });
   }, []);
 

@@ -47,7 +47,7 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
     // };
 
     const filterContests = (contests) => {
-        return contests.filter((contest) => selectedPlatforms.includes(contest.site));
+        return contests.filter((contest) => selectedPlatforms.includes(contest.platform));
     };
 
     // const renderTimeBox = (time, isStart) => (
@@ -57,8 +57,20 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
     // );
 
     const renderContestCard = (contest) => {
-        const startDate = new Date(contest.start_time);
-        const endDate = new Date(contest.end_time);
+        const startDate = new Date(contest.startTimeISO);
+        // Parse duration from format like "2 hours" or "120 minutes"
+        const durationMatch = contest.duration?.match(/(\d+)\s*(hour|minute|hr|min)/);
+        let durationMs = 0;
+        if (durationMatch) {
+            const value = parseInt(durationMatch[1]);
+            const unit = durationMatch[2].toLowerCase();
+            if (unit.includes('hour') || unit === 'hr') {
+                durationMs = value * 60 * 60 * 1000;
+            } else if (unit.includes('minute') || unit === 'min') {
+                durationMs = value * 60 * 1000;
+            }
+        }
+        const endDate = new Date(startDate.getTime() + durationMs);
 
         // Format date and time strings
         const dateRangeString = `${startDate.toLocaleDateString('en-US', {
@@ -82,7 +94,7 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
             minute: '2-digit',
         })}`;
 
-        if (!selectedPlatforms.includes(contest.site)) {
+        if (!selectedPlatforms.includes(contest.platform)) {
             // Skip rendering if the platform is not selected
             return null;
         }
@@ -94,10 +106,10 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
             >
                 <div className="flex flex-col md:flex-row">
                     <div className="mr-4">
-                        {mapping[contest.site] && (
+                        {mapping[contest.platform] && (
                             <img
-                                src={mapping[contest.site].logo}
-                                alt={mapping[contest.site].name}
+                                src={mapping[contest.platform].logo}
+                                alt={mapping[contest.platform]}
                                 style={{
                                     width: 70,
                                     height: 70,
@@ -110,7 +122,7 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
                     </div>
                     <div className="flex-grow">
                         <a
-                            href={contest.url}
+                            href={contest.href}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-500 hover:underline text-lg font-semibold md:text-xl"
@@ -119,7 +131,7 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
                         </a>
                         <div className="mt-2">
                             <span className="font-semibold">
-                                {mapping[contest.site]?.name}
+                                {contest.platform}
                             </span>
                         </div>
                         <div className="mt-2">
@@ -160,7 +172,7 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
 
 
     const setNotification = (contest, minutesBefore) => {
-        const startTime = new Date(contest.start_time).getTime();
+        const startTime = new Date(contest.startTimeISO).getTime();
         const notificationTime = startTime - minutesBefore * 60 * 1000; // Calculate the notification time
         console.log("Notification time: ", notificationTime);
         console.log("Start time: ", startTime);
