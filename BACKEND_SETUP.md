@@ -32,6 +32,11 @@ PORT=5001
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:3000
 LOG_LEVEL=info
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=100
+GMAIL_USER=your_gmail_account@gmail.com
+GMAIL_PASSWORD=your_gmail_app_password
+EMAIL_FROM=your_gmail_account@gmail.com
 ```
 
 ## Run the server
@@ -54,7 +59,10 @@ The API server listens on `http://localhost:5001` by default.
 - `GET /api/codeforces` - CodeForces contests
 - `GET /api/codechef` - CodeChef contests
 - `GET /api/leetcode` - LeetCode contests
+- `POST /send-email` - Send contest reminder emails (requires SMTP env config)
 - `GET /health` - health check
+
+> All API routes are protected by rate limiting to prevent abuse. The rate limit defaults to 100 requests per 15 minutes.
 
 ## Example requests
 

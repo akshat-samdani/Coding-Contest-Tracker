@@ -28,3 +28,4 @@ coverage/
 .cache/
 temp/
 tmp/
+coding-contest-tracker-app/.env.production

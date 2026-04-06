@@ -76,8 +76,14 @@ PORT=5001
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:3000
 LOG_LEVEL=info
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=100
+GMAIL_USER=your_gmail_account@gmail.com
+GMAIL_PASSWORD=your_gmail_app_password
+EMAIL_FROM=your_gmail_account@gmail.com
 ```
 
+This backend includes rate limiting on all API routes to protect the server from abuse.
 ## Deployment
 
 This repository is structured for backend deployment. Vercel will start the server with `npm start` by default. Set required environment variables in the Vercel dashboard.
