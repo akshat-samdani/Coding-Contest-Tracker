@@ -3,6 +3,9 @@ import { auth } from '../firebase';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AddToCalendarButton } from 'add-to-calendar-button-react';
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://coding-contest-tracker.vercel.app';
+
 const mapping = {
     HackerEarth: {
         logo: "https://yt3.ggpht.com/ytc/AAUvwngkLcuAWLtda6tQBsFi3tU9rnSSwsrK1Si7eYtx0A=s176-c-k-c0x00ffffff-no-rj",
@@ -249,7 +252,7 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
 
             const recipientEmail = user.email;
 
-            fetch('http://localhost:3001/send-email', {
+            fetch(`${API_BASE_URL}/send-email`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -268,10 +271,12 @@ function ContestColumns({ liveContests, todayContests, upcomingContests, selecte
                         console.log('Email sent successfully');
                     } else {
                         console.error('Failed to send email:', data.message);
+                        toast.error('Email reminder could not be sent.', { autoClose: 4000 });
                     }
                 })
                 .catch(error => {
                     console.error('Error sending email:', error);
+                    toast.error('Email reminder backend is unavailable.', { autoClose: 4000 });
                 });
 
             setTimeout(() => {

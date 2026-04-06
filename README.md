@@ -82,7 +82,7 @@ For full local development with both backend and frontend:
    ```
    Server runs on `http://localhost:5003`
    You should see:
-   ```
+   ```bash
    🚀 Contest API Server started
    📍 Running on http://localhost:5003
    📚 Environment: development
@@ -105,6 +105,16 @@ For full local development with both backend and frontend:
 npm run dev
 ```
 This starts both backend (port 5003) and frontend concurrently using the `concurrently` package.
+
+### Production Build Environment
+
+The project supports a separate production environment file for builds.
+- Use `.env` for local development.
+- Use `.env.production` when building for production.
+
+Create `coding-contest-tracker-app/.env.production` with your production backend URL and Firebase config.
+
+When you run `npm run build`, Create React App automatically picks up `.env.production`.
 
 ### Production Deployment
 
@@ -326,6 +336,7 @@ This repository includes a Chrome extension version that can be deployed to the 
    ```bash
    npm run build
    ```
+   This build automatically uses `coding-contest-tracker-app/.env.production` when present.
 
 4. **Package the extension**
    ```bash
@@ -340,6 +351,37 @@ This repository includes a Chrome extension version that can be deployed to the 
    zip -r ../coding-contest-tracker-extension.zip .
    cd ..
    ```
+
+### Test in Chrome Developer Mode
+
+1. **Open Chrome Extensions**
+   - Go to `chrome://extensions`
+   - Turn on **Developer mode** in the top right
+
+2. **Load the unpacked extension**
+   - Click **Load unpacked**
+   - Select the `coding-contest-tracker-app/build` folder
+
+3. **Verify the extension**
+   - Open the extension popup or toolbar icon
+   - Check the console via **Inspect views** for errors
+   - Confirm the app fetches contests from the backend
+
+4. **If using a local backend**
+   - Start the backend server first:
+     ```bash
+     npm run server
+     ```
+   - Ensure `REACT_APP_API_BASE_URL` points to your local backend before building the extension.
+
+5. **If using the deployed backend**
+   - Build with a production backend URL:
+     ```bash
+     REACT_APP_API_BASE_URL=https://coding-contest-tracker.vercel.app npm run build
+     ```
+
+6. **Rebuild after changes**
+   - Every time you update source files, rebuild and reload the unpacked extension.
 
 ### Upload to Chrome Web Store
 
