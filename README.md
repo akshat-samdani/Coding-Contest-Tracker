@@ -8,6 +8,8 @@ A full-stack application to track and aggregate coding contests from multiple pl
 - [Project Structure](./PROJECT_STRUCTURE.md) - Understand the architecture
 - [Backend Setup](./BACKEND_SETUP.md) - Detailed backend documentation
 
+> Note: This branch is primarily the frontend/application branch. For backend server changes, switch to the `api-server` branch.
+
 ## 🎯 Features
 
 - **Real-time Contest Updates** from multiple platforms
